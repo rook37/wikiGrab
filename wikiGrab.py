@@ -114,8 +114,6 @@ def cont(reaction, message):
     for posts in wikiPosts:
         if posts.mID == message.id and posts.type == 1:
             posts.longprint(posts.pNo) 
-            #dirty to have class values accessed outside - should i keep this in cont and move the mID boolean inside as well?
-            #should  the sResult class be its own file altogether?
             
 async def recieve(client, channel, targ, msg):
     global bot
