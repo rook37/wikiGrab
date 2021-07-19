@@ -35,10 +35,10 @@ class sResult:
         self.compareList = self.names.copy()
         self.urls = data[3]    
         self.msg = msg
-        self.pNo = 0
+        self.printNo = 0
         self.message = None
         self.chan = chan
-        self.type = 0
+        self.moreResults = 0
         self.currDict = {1:0,2:2,3:3,4:4,5:5}
         self.valid = 0
         self.keepSearching = 0
@@ -67,7 +67,7 @@ class sResult:
                 self.message = await self.chan.send(self.urls[self.compareList.index(self.msg.lower())])
         elif self.valid<=5: #If the list has multiple results but less than 5, print that selection
                 c = 1
-                string = "Please react with the # corresponding to the desired page:\n"
+                string = "Please react with the # corresponding to the desired page\n"
                 for allItems in self.names:
                     if "/" in allItems and self.wf == 0:
                         continue
@@ -76,12 +76,12 @@ class sResult:
                     c += 1                    
                 await self.sendIt(string)
         else: #If the list has >5 results, print the first 5 and track where we're at
-            self.type = 1
-            await self.longPrint(self.pNo)
+            self.moreResults = 1
+            await self.longPrint(self.printNo)
              
     async def longPrint(self,c):
         self.valid=1
-        string = "Please react with the # corresponding to the desired page"  # or select the + to keep searching:\n"
+        string = "Please react with the # corresponding to the desired page (or, if available, select the + to keep searching)\n"
         #for allItems in islice(self.names, c, min(len(self.names),c+5)):
         for item in range(c,len(self.names)):            
             if "/" in self.names[item] and self.wf == 0:
@@ -93,7 +93,7 @@ class sResult:
                 break
             if(item==len(self.names)-1): break #greeeeeeasy, need to think of a cleaner approach
             self.valid+=1           
-        self.pNo = c+5
+        self.printNo = c+5
         await self.sendIt(string)
 
     async def sendIt(self,string): #takes built string and sends/edits message
@@ -106,16 +106,16 @@ class sResult:
         await self.react(self.message)
 
     def cont(self):
-        if(self.type==1):
-            self.longPrint(self.pNo)
+        if(self.moreResults==1):
+            self.longPrint(self.printNo)
     
-def cont(reaction, message):
+'''def cont(reaction, message):
     # if reaction is 1-5 print it
     for posts in wikiPosts:
         if posts.mID == message.id and posts.type == 1:
-            posts.longprint(posts.pNo) 
+            posts.longPrint(posts.printNo) 
             #dirty to have class values accessed outside - should i keep this in cont and move the mID boolean inside as well?
-            #should  the sResult class be its own file altogether?
+            #should  the sResult class be its own file altogether?'''
             
 async def recieve(client, channel, targ, msg):
     global bot
@@ -168,8 +168,8 @@ def grab(URL, msg,wf):
    
     return data
 
-@bot.event
-async def reacted(reaction):
+@bot.event 
+async def reacted(reaction): #message handler will send reactions here as they arrive
     found = None
     for posts in wikiPosts:
         if(reaction.message.content == posts.message.content):
@@ -182,12 +182,3 @@ async def reacted(reaction):
         else: 
             await found.print()
 
-# async def on_reaction_add(reaction,user):
-#     if reaction.message in wikiPosts.msg:
-#         c = 0
-#         while(c<len(wikiPosts)):
-#             if reaction.message is not wikiPosts[c].msg:
-#                 c+=1
-#             else:
-#                 break
-#         print(c)
